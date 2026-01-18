@@ -1,1 +1,1 @@
-# Messenger-Server
+# Open-Source Messenger Server
