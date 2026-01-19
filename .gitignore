@@ -3,34 +3,6 @@ __pycache__/
 *.py[codz]
 *$py.class
 
-# C extensions
-*.so
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-*.log
-
-.scrapy
-
-docs/_build/
-
-.pybuilder/
-target/
-
-.ipynb_checkpoints
-
-profile_default/
-ipython_config.py
-
-.pdm-python
-.pdm-build/
-
 # Environments
 .env
 .envrc
@@ -41,33 +13,6 @@ ENV/
 env.bak/
 venv.bak/
 
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
-
 # PyCharm
 .abstra/
 .idea/
-
-# Visual Studio Code
-.ruff_cache/
