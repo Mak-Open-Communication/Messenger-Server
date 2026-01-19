@@ -9,19 +9,27 @@ class Settings(BaseSettings):
     """Server settings."""
 
     # Server settings
-    server_host: str = "0.0.0.0"
-    server_port: int = 4207
-    server_passwd: str = "" # If string empty, then no password
+    host: str = "0.0.0.0"
+    port: int = 4207
+
+    # PostgreSQL Server settings
+    psql_server_host: str = "localhost"
+    psql_server_port: int = 5432
+    psql_db: str = "messenger_main_db"
+    psql_user: str = "messenger_app"
+    psql_password: str = "mycoolmessenger"
 
     # Usage media server
     media_serv_host: str = "localhost"
     media_serv_port: int = 4205
+    media_serv_api_key: str = "<key>"
 
     # Logging
     log_level: str = "DEBUG"
 
     class Config:
         env_file = ".env"
+        env_prefix = "MAIN_"
         env_file_encoding = "utf-8"
 
 
