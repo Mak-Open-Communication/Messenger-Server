@@ -16,3 +16,6 @@ venv.bak/
 # PyCharm
 .abstra/
 .idea/
+
+.claude
+CLAUDE.md
