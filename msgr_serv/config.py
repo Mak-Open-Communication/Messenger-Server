@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     # Server settings
     host: str = "0.0.0.0"
     port: int = 4207
+    max_connections: int = 128
+    expose_transactions: bool = True
 
     # PostgreSQL Server settings
     psql_server_host: str = "localhost"
