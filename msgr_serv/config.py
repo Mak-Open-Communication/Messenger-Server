@@ -25,11 +25,12 @@ class Settings(BaseSettings):
     media_serv_api_key: str = "<key>"
 
     # Logging
-    log_level: str = "DEBUG"
+    logging_level: str = "DEBUG"
+    logs_dir: str = "logs"
 
     class Config:
         env_file = ".env"
-        env_prefix = "MAIN_"
+        # env_prefix = "MAIN_"
         env_file_encoding = "utf-8"
 
 
