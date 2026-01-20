@@ -26,6 +26,7 @@ class Settings(BaseSettings):
 
     # Logging
     logging_level: str = "DEBUG"
+    logging_on_file: bool = True
     logs_dir: str = "logs"
 
     class Config:
