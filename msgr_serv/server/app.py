@@ -6,12 +6,12 @@ from msgr_serv.common.utils import create_required_dirs
 from msgr_serv.client_request_handler import register_transactions
 
 from msgr_serv.config import settings
-from msgr_serv.version import (
-    VERSION,
-    VERSION_NAME,
-    VERSION_ID,
-    API_VERSION
-)
+# from msgr_serv.version import (
+#     VERSION,
+#     VERSION_NAME,
+#     VERSION_ID,
+#     API_VERSION
+# )
 
 
 class MessengerServer:
