@@ -17,24 +17,20 @@ class Settings(BaseSettings):
     # PostgreSQL Server settings
     psql_server_host: str = "localhost"
     psql_server_port: int = 5432
-    psql_db: str = "messenger_main_db"
-    psql_user: str = "messenger_app"
-    psql_password: str = "mycoolmessenger"
+    psql_db: str = "-"
+    psql_user: str = "-"
+    psql_password: str = "-"
 
-    # Usage media server
-    media_serv_host: str = "localhost"
-    media_serv_port: int = 4205
-    media_serv_api_key: str = "<key>"
+    # S3 Server settings
+    s3_endpoint_url: str = "<endpoint>"
+    s3_access_key: str = "<access-key>"
+    s3_secret_key: str = "<secret-key>"
+    s3_bucket_name: str = "<bkt>"
 
     # Logging
     logging_level: str = "DEBUG"
     logging_on_file: bool = True
     logs_dir: str = "logs"
-
-    # Cluster settings
-    node_id: str = "000000000001:00000000-0000-0000-0000-000000000000"
-    node_class: str = "server"
-    cluster_verify_key: str = ""
 
     class Config:
         env_file = ".env"
