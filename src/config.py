@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     logging_on_file: bool = True
     logs_dir: str = "logs"
 
+    # Cluster settings
+    node_id: str = "000000000001:00000000-0000-0000-0000-000000000000"
+    node_class: str = "server"
+    cluster_verify_key: str = ""
+
     class Config:
         env_file = ".env"
         # env_prefix = "MAIN_"

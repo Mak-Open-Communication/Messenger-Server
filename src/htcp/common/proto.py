@@ -4,10 +4,13 @@ Defines the binary protocol format for client-server communication.
 """
 
 import struct
+import warnings
 
 from enum import IntEnum
 from typing import Any, Dict
+
 from .serialization import serialize, deserialize
+from .constants import MAGIC_BYTES, PROTOCOL_VERSION, HEADER_SIZE, MAX_PAYLOAD_SIZE
 
 
 class PacketType(IntEnum):
@@ -16,11 +19,16 @@ class PacketType(IntEnum):
     HANDSHAKE_REQUEST = 0x01
     TRANSACTION_CALL = 0x02
     DISCONNECT = 0x03
+    SUBSCRIBE_REQUEST = 0x04
+    UNSUBSCRIBE_REQUEST = 0x05
 
     # Server -> Client
     HANDSHAKE_RESPONSE = 0x11
     TRANSACTION_RESULT = 0x12
     ERROR = 0x13
+    SUBSCRIBE_DATA = 0x14
+    SUBSCRIBE_END = 0x15
+    SUBSCRIBE_ERROR = 0x16
 
 
 class ErrorCode(IntEnum):
@@ -31,12 +39,6 @@ class ErrorCode(IntEnum):
     EXECUTION_ERROR = 3
     PROTOCOL_ERROR = 4
     INTERNAL_ERROR = 5
-
-
-# Protocol constants
-MAGIC_BYTES = b'HTCP'
-PROTOCOL_VERSION = 1
-HEADER_SIZE = 12  # MAGIC(4) + VERSION(1) + TYPE(1) + LENGTH(4) + RESERVED(2)
 
 
 class Packet:
@@ -89,41 +91,19 @@ class Packet:
         return cls(packet_type, payload)
 
     @classmethod
-    def read_from_socket(cls, sock) -> 'Packet':
-        """Read a complete packet from socket."""
-        header = _recv_exact(sock, HEADER_SIZE)
-        if not header:
-            raise ConnectionError("Connection closed")
+    def read_from_socket(cls, sock, max_payload_size: int = MAX_PAYLOAD_SIZE) -> 'Packet':
+        """
+        Read a complete packet from socket.
 
-        magic = header[:4]
-        if magic != MAGIC_BYTES:
-            raise ValueError(f"Invalid magic bytes: {magic}")
-
-        version = header[4]
-        if version != PROTOCOL_VERSION:
-            raise ValueError(f"Unsupported protocol version: {version}")
-
-        packet_type = PacketType(header[5])
-        payload_length = struct.unpack('>I', header[6:10])[0]
-
-        payload = b''
-        if payload_length > 0:
-            payload = _recv_exact(sock, payload_length)
-            if len(payload) != payload_length:
-                raise ConnectionError("Connection closed while reading payload")
-
-        return cls(packet_type, payload)
-
-
-def _recv_exact(sock, size: int) -> bytes:
-    """Receive exact number of bytes from socket."""
-    data = b''
-    while len(data) < size:
-        chunk = sock.recv(size - len(data))
-        if not chunk:
-            return data
-        data += chunk
-    return data
+        Deprecated: Use htcp.common.transport.recv_packet() instead.
+        """
+        warnings.warn(
+            "Packet.read_from_socket() is deprecated, use recv_packet() from htcp.common.transport",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        from .transport import recv_packet
+        return recv_packet(sock, max_payload_size)
 
 
 class HandshakeRequest:

@@ -223,7 +223,8 @@ def _unpack_length(data: bytes) -> tuple[int, int]:
 
 
 def _serialize_int(obj: int) -> bytes:
-    """Serialize integer, handling big integers."""
+    """Serialize integer, handling big integers.
+    """
     if -9223372036854775808 <= obj <= 9223372036854775807:
         if obj >= 0:
             return bytes([TypeTag.INT]) + struct.pack('>q', obj)
@@ -242,10 +243,11 @@ def _serialize_int(obj: int) -> bytes:
 def _serialize_sequence(obj, tag: int) -> bytes:
     """Serialize list, tuple, set, frozenset."""
     items = list(obj)
-    result = bytes([tag]) + _pack_length(len(items))
+    result = bytearray([tag])
+    result.extend(_pack_length(len(items)))
     for item in items:
-        result += serialize(item)
-    return result
+        result.extend(serialize(item))
+    return bytes(result)
 
 
 def _deserialize_sequence(data: bytes, offset: int, container_type: type, expected_type: Type = None) -> tuple[list, int]:
@@ -272,11 +274,12 @@ def _deserialize_sequence(data: bytes, offset: int, container_type: type, expect
 
 def _serialize_dict(obj: dict) -> bytes:
     """Serialize dictionary."""
-    result = bytes([TypeTag.DICT]) + _pack_length(len(obj))
+    result = bytearray([TypeTag.DICT])
+    result.extend(_pack_length(len(obj)))
     for key, value in obj.items():
-        result += serialize(key)
-        result += serialize(value)
-    return result
+        result.extend(serialize(key))
+        result.extend(serialize(value))
+    return bytes(result)
 
 
 def _deserialize_dict(data: bytes, offset: int, expected_type: Type = None) -> tuple[dict, int]:
@@ -312,16 +315,18 @@ def _serialize_dataclass(obj) -> bytes:
     name_bytes = class_name.encode('utf-8')
 
     fields = dataclasses.fields(obj)
-    result = bytes([TypeTag.DATACLASS])
-    result += _pack_length(len(name_bytes)) + name_bytes
-    result += _pack_length(len(fields))
+    result = bytearray([TypeTag.DATACLASS])
+    result.extend(_pack_length(len(name_bytes)))
+    result.extend(name_bytes)
+    result.extend(_pack_length(len(fields)))
 
     for field in fields:
         field_name = field.name.encode('utf-8')
-        result += _pack_length(len(field_name)) + field_name
-        result += serialize(getattr(obj, field.name))
+        result.extend(_pack_length(len(field_name)))
+        result.extend(field_name)
+        result.extend(serialize(getattr(obj, field.name)))
 
-    return result
+    return bytes(result)
 
 
 def _deserialize_dataclass(data: bytes, offset: int, expected_type: Type = None) -> tuple[Any, int]:
@@ -447,10 +452,12 @@ def _serialize_enum(obj: Enum) -> bytes:
     class_name = f"{cls.__module__}.{cls.__qualname__}".encode('utf-8')
     member_name = obj.name.encode('utf-8')
 
-    result = bytes([TypeTag.ENUM])
-    result += _pack_length(len(class_name)) + class_name
-    result += _pack_length(len(member_name)) + member_name
-    return result
+    result = bytearray([TypeTag.ENUM])
+    result.extend(_pack_length(len(class_name)))
+    result.extend(class_name)
+    result.extend(_pack_length(len(member_name)))
+    result.extend(member_name)
+    return bytes(result)
 
 
 def _deserialize_enum(data: bytes, offset: int, expected_type: Type = None) -> tuple[Any, int]:
