@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     psql_db: str = "-"
     psql_user: str = "-"
     psql_password: str = "-"
+    psql_pool_min_size: int = 1
+    psql_pool_max_size: int = 3
 
     # S3 Server settings
     s3_endpoint_url: str = "<endpoint>"
