@@ -10,6 +10,8 @@ from src.middleware.logging_middleware import setup_logging
 from src.database_api import DatabaseAPI
 from src.s3_api import S3API
 
+from src.handlers import register_handlers
+
 from src.htcp.aio_server import AsyncServer
 
 from src.config import settings
@@ -82,5 +84,7 @@ class Application:
             expose_transactions=settings.expose_transactions,
             logger=logging.getLogger("htcp.server"),
         )
+
+        register_handlers(app=self.server)
 
         return self.server
