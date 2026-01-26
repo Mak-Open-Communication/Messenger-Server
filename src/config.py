@@ -28,11 +28,13 @@ class Settings(BaseSettings):
     s3_access_key: str = "<access-key>"
     s3_secret_key: str = "<secret-key>"
     s3_bucket_name: str = "<bkt>"
+    s3_verify_ssl: bool = True
 
     # Logging
     logging_level: str = "DEBUG"
     logging_on_file: bool = True
     logs_dir: str = "logs"
+    showing_tracebacks: bool = True
 
     class Config:
         env_file = ".env"
