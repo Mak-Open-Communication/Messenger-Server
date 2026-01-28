@@ -57,7 +57,7 @@ class MessageContent:
     message_id: int # For message
 
     resource_name: str # DB, S3
-    type: str # Test, Media, File
+    type: str # Text, File
     content: str # S3 File url; For text max 1024 symbols
 
 

@@ -9,15 +9,7 @@ if TYPE_CHECKING:
 from src.config import settings
 
 
-class DatabaseService:
-    def __init__(self, app: "Application"):
-        self.logger = logging.getLogger("db-service")
-        self.logger.setLevel(settings.logging_level)
-
-        self.app = app
-
-
-class BaseRepository:
+class BaseDBRepository:
     repository_name = "notifies"
     table_model = None
 
@@ -27,4 +19,24 @@ class BaseRepository:
 
         self.app = app
 
-        self.db_service = DatabaseService(app=app)
+        self.db = self.app.db
+
+
+    def get_records(self, find_filters: dict) -> list:
+        pass
+
+    def add_record(self, record) -> bool:
+        pass
+
+class BaseS3Repository:
+    repository_name: str = "avatars"
+
+    resources_dir: str = "users/avatars/"
+
+    def __init__(self, app: "Application"):
+        self.logger = logging.getLogger(f"{self.repository_name}-repo")
+        self.logger.setLevel(settings.logging_level)
+
+        self.app = app
+
+        self.s3 = self.app.s3

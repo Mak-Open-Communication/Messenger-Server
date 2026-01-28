@@ -4,6 +4,7 @@ Production entry point for Messenger HTCP Server.
 
 import asyncio
 import sys
+import logging
 
 from src.app import Application
 from src.config import settings
@@ -30,6 +31,8 @@ async def main():
 
 
 if __name__ == "__main__":
+    logger = logging.getLogger("app-starter")
+
     try:
         asyncio.run(main())
 
@@ -40,4 +43,7 @@ if __name__ == "__main__":
         if settings.showing_tracebacks:
             import traceback
             traceback.print_exc()
+        else:
+            logger.critical(
+                "Critical unexpected error. Enable the 'showing_tracebacks' parameter in your .env file for debugging.")
         sys.exit(1)

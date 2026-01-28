@@ -7,11 +7,11 @@ import logging
 from typing import Optional
 
 from src.middleware.logging_middleware import setup_logging
-from src.database_api import DatabaseAPI
-from src.s3_api import S3API
+
+from src.db import DatabaseAPI
+from src.s3 import S3API
 
 from src.handlers import register_handlers
-
 from src.htcp.aio_server import AsyncServer
 
 from src.config import settings
@@ -85,6 +85,6 @@ class Application:
             logger=logging.getLogger("htcp.server"),
         )
 
-        register_handlers(app=self.server)
+        register_handlers(app=self)
 
         return self.server
