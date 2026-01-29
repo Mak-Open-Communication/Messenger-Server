@@ -5,15 +5,19 @@ if TYPE_CHECKING:
 
 from src.handlers.debug import register_debug_handlers
 
-# from src.handlers.auth import register_auth_handlers
-# from src.handlers.user import register_user_handlers
-# from src.handlers.devices import register_devices_handlers
+from src.handlers.auth import register_auth_handlers
+from src.handlers.users import register_users_handlers
 
-# from src.handlers.chats import register_chat_handlers
-# from src.handlers.messages import register_messages_handlers
+from src.handlers.chats import register_chats_handlers
+from src.handlers.messages import register_messages_handlers
 
 
 def register_handlers(app: "Application"):
     """Register all handlers."""
 
     register_debug_handlers(app=app)
+
+    register_auth_handlers(app=app)
+
+    register_chats_handlers(app=app)
+    register_messages_handlers(app=app)

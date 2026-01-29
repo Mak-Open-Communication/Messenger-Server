@@ -6,8 +6,8 @@ if TYPE_CHECKING:
 # from src.middleware import LoggingMiddleware
 
 
-def register_auth_handlers(app: "Application"):
-    """Register auth handlers."""
+def register_users_handlers(app: "Application"):
+    """Register users handlers."""
 
     # @app.server.transaction(code="test_connection")
     # @LoggingMiddleware.log_transaction
