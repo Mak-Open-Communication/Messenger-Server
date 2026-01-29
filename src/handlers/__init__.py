@@ -18,6 +18,7 @@ def register_handlers(app: "Application"):
     register_debug_handlers(app=app)
 
     register_auth_handlers(app=app)
+    register_users_handlers(app=app)
 
     register_chats_handlers(app=app)
     register_messages_handlers(app=app)
