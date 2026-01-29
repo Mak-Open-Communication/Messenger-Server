@@ -7,6 +7,7 @@ if TYPE_CHECKING:
 
 from src.services.resources_service import BaseDBRepository
 from src.services.media_service import UsersFilesRepository
+
 from src.models.db_models import MessageDB, MessageContentDB, MessageTagDB
 
 

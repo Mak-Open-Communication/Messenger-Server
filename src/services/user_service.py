@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from src.app import Application
 
 from src.services.resources_service import BaseDBRepository
+
 from src.models.db_models import AccountDB, TokenDB
 from src.models.api_models import Account, AuthToken
 
