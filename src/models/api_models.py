@@ -1,37 +1,47 @@
+"""API models for client responses"""
+
+from pydantic import BaseModel
 from typing import List, Optional
-from dataclasses import dataclass
 
 
-@dataclass
-class Account:
+class Account(BaseModel):
+    """User account information"""
+
     account_id: int
-    username: str
 
-    online_at: str
+    username: str
+    display_name: str
+
+    last_online_at: str
     in_online: bool
 
     created_at: str
 
 
-@dataclass
-class AuthToken:
-    token_id: str
+class AuthToken(BaseModel):
+    """Authentication token information"""
 
-    user_id: int # For user
+    token_id: str
+    user_id: int
+
     token: str
+    agent: Optional[str] = None
+
+    is_current: bool
+    is_online: bool
 
     created_at: str
 
-    is_current: bool
 
+class PersonalTokensList(BaseModel):
+    """List of user tokens"""
 
-@dataclass
-class PersonalTokensList:
     tokens: List[AuthToken]
 
 
-@dataclass
-class Chat:
+class Chat(BaseModel):
+    """Chat information"""
+
     chat_id: int
     chat_name: str
 
@@ -42,31 +52,35 @@ class Chat:
     created_at: str
 
 
-@dataclass
-class MessageTag:
+class MessageTag(BaseModel):
+    """Message tag for UI effects"""
+
     tag_id: int
-    message_id: int # For message
-
-    type: str # Show-Message-UI-Effect
-    tag: str # FireEffect
-
-
-@dataclass
-class MessageContent:
-    content_id: int
-    message_id: int # For message
-
-    resource_name: str # DB, S3
-    type: str # Text, File
-    content: str # S3 File url; For text max 1024 symbols
-
-
-@dataclass
-class Message:
     message_id: int
-    chat_id: int # For chat
 
-    is_read: bool # Message is read mark
+    type: str
+    tag: str
+
+
+class MessageContent(BaseModel):
+    """Message content (text or file)"""
+
+    content_id: int
+    message_id: int
+
+    resource_name: str
+
+    type: str
+    content: str
+
+
+class Message(BaseModel):
+    """Message with sender, contents and tags"""
+
+    message_id: int
+    chat_id: int
+
+    is_read: bool
     sender: Account
 
     tags: List[MessageTag]
@@ -75,13 +89,147 @@ class Message:
     created_at: str
 
 
-@dataclass
-class MessagesList:
+class MessagesList(BaseModel):
+    """List of messages"""
+
     messages: List[Message]
 
 
-@dataclass
-class AuthCredentials:
-    username: Optional[str]
-    password: Optional[str]
-    token: Optional[str]
+class ErrorResponse(BaseModel):
+    """Error response for client errors"""
+
+    error: str
+    message: str
+    details: Optional[dict] = None
+
+
+# Auth handler responses
+class RegisterResponse(BaseModel):
+    """Response for register endpoint"""
+
+    success: bool
+    account_id: int
+
+
+class LoginResponse(BaseModel):
+    """Response for login endpoint"""
+
+    success: bool
+
+    token: str
+    account: Account
+
+
+class LogoutResponse(BaseModel):
+    """Response for logout endpoint"""
+
+    success: bool
+
+
+class ValidateTokenResponse(BaseModel):
+    """Response for validate_token endpoint"""
+
+    valid: bool
+
+
+class GetMyTokensResponse(BaseModel):
+    """Response for get_my_tokens endpoint"""
+
+    success: bool
+    tokens: PersonalTokensList
+
+
+# User handler responses
+class GetProfileResponse(BaseModel):
+    """Response for get_profile endpoint"""
+
+    success: bool
+    account: Account
+
+
+class UpdateProfileResponse(BaseModel):
+    """Response for update_profile endpoint"""
+
+    success: bool
+    account: Account
+
+
+# Chat handler responses
+class CreateChatResponse(BaseModel):
+    """Response for create_chat endpoint"""
+
+    success: bool
+    chat: Chat
+
+
+class GetMyChatsResponse(BaseModel):
+    """Response for get_my_chats endpoint"""
+
+    success: bool
+    chats: List[Chat]
+
+
+class GetChatInfoResponse(BaseModel):
+    """Response for get_chat_info endpoint"""
+
+    success: bool
+    chat: Chat
+
+
+class AddMemberResponse(BaseModel):
+    """Response for add_member endpoint"""
+
+    success: bool
+
+
+class RemoveMemberResponse(BaseModel):
+    """Response for remove_member endpoint"""
+
+    success: bool
+
+
+class LeaveChatResponse(BaseModel):
+    """Response for leave_chat endpoint"""
+
+    success: bool
+
+
+class UpdateChatResponse(BaseModel):
+    """Response for update_chat endpoint"""
+
+    success: bool
+    chat: Chat
+
+
+# Message handler responses
+class SendMessageResponse(BaseModel):
+    """Response for send_message endpoint"""
+
+    success: bool
+    message: Message
+
+
+class GetMessagesResponse(BaseModel):
+    """Response for get_messages endpoint"""
+
+    success: bool
+    messages: MessagesList
+
+
+class MarkReadResponse(BaseModel):
+    """Response for mark_read endpoint"""
+
+    success: bool
+
+
+class EditMessageResponse(BaseModel):
+    """Response for edit_message endpoint"""
+
+    success: bool
+    message: Message
+
+
+class DeleteMessageResponse(BaseModel):
+    """Response for delete_message endpoint"""
+
+    success: bool
