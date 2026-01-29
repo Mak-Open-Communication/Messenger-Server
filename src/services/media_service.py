@@ -1,4 +1,4 @@
-"""Media storage repositories and service"""
+"""Media storage repositories"""
 
 import mimetypes
 
