@@ -74,17 +74,17 @@ class LoggingMiddleware:
 
     def log_transaction(self, func: Callable) -> Callable:
         """
-                Decorator for logging transactions (handlers).
-                It logs the input parameters, execution time, and the result/error.
+        Decorator for logging transactions (handlers).
+        It logs the input parameters, execution time, and the result/error.
 
-                Usage:
-                    logger_middleware = LoggingMiddleware()
+        Usage:
+            logger_middleware = LoggingMiddleware()
 
-                    @server.transaction(code="send_message")
-                    @logger_middleware.log_transaction
-                    def send_message(...):
-                        pass
-                """
+            @server.transaction(code="send_message")
+            @logger_middleware.log_transaction
+            def send_message(...):
+                pass
+        """
 
         @wraps(func)
         def wrapper(*args, **kwargs):
