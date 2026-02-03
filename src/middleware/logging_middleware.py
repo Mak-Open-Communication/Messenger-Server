@@ -72,33 +72,22 @@ class LoggingMiddleware:
 
         return sanitized
 
-    def log_transaction(self, func: Callable) -> Callable:
-        """
-        Decorator for logging transactions (handlers).
-        It logs the input parameters, execution time, and the result/error.
-
-        Usage:
-            logger_middleware = LoggingMiddleware()
-
-            @server.transaction(code="send_message")
-            @logger_middleware.log_transaction
-            def send_message(...):
-                pass
-        """
+    def _transaction_decorator(self, func: Callable, level: int) -> Callable:
+        """Base decorator for logging transactions."""
 
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        async def wrapper(*args, **kwargs):
             transaction_name = func.__name__
+            user_id = kwargs.get("user_id", "anonymous")
             start_time = time.time()
 
-            # safe_kwargs = self._sanitize_params(kwargs.copy())
-
             try:
-                result = func(*args, **kwargs)
+                result = await func(*args, **kwargs)
                 duration = time.time() - start_time
 
-                self.logger.info(
-                    f"Transaction '{transaction_name}' from success handled [within {duration:.3f}s]"
+                self.logger.log(
+                    level,
+                    f"[user:{user_id}] Transaction '{transaction_name}' completed [{duration:.3f}s]"
                 )
 
                 return result
@@ -107,12 +96,64 @@ class LoggingMiddleware:
                 duration = time.time() - start_time
 
                 self.logger.error(
-                    f"Transaction failed: {transaction_name} | "
-                    f"Error: {type(e).__name__}: {str(e)} | "
-                    f"Duration: {duration:.3f}s",
+                    f"[user:{user_id}] Transaction '{transaction_name}' failed: "
+                    f"{type(e).__name__}: {e} [{duration:.3f}s]",
                     exc_info=True
                 )
 
                 raise
 
         return wrapper
+
+    def log_transaction(self, func: Callable) -> Callable:
+        """Decorator for logging transactions at INFO level."""
+
+        return self._transaction_decorator(func, logging.INFO)
+
+    def log_transaction_debug(self, func: Callable) -> Callable:
+        """Decorator for logging transactions at DEBUG level."""
+
+        return self._transaction_decorator(func, logging.DEBUG)
+
+    def _subscription_decorator(self, func: Callable, level: int) -> Callable:
+        """Base decorator for logging subscriptions."""
+
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            subscription_name = func.__name__
+            user_id = kwargs.get("user_id", "anonymous")
+
+            self.logger.log(
+                level,
+                f"[user:{user_id}] Subscription '{subscription_name}' started"
+            )
+
+            try:
+                async for item in func(*args, **kwargs):
+                    yield item
+
+            except GeneratorExit:
+                self.logger.log(
+                    level,
+                    f"[user:{user_id}] Subscription '{subscription_name}' closed"
+                )
+
+            except Exception as e:
+                self.logger.error(
+                    f"[user:{user_id}] Subscription '{subscription_name}' error: "
+                    f"{type(e).__name__}: {e}",
+                    exc_info=True
+                )
+                raise
+
+        return wrapper
+
+    def log_subscription(self, func: Callable) -> Callable:
+        """Decorator for logging subscriptions at INFO level."""
+
+        return self._subscription_decorator(func, logging.INFO)
+
+    def log_subscription_debug(self, func: Callable) -> Callable:
+        """Decorator for logging subscriptions at DEBUG level."""
+
+        return self._subscription_decorator(func, logging.DEBUG)
