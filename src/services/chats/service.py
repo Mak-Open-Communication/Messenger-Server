@@ -36,11 +36,7 @@ class ChatService:
         for username in member_usernames:
             account = await self.accounts_repo.get_by_username(username)
             if not account:
-                return Result(
-                    success=False,
-                    error=f"User '{username}' not found",
-                    error_code="NOT_FOUND"
-                )
+                return Result(success=False, errors=[("NOT_FOUND", f"User '{username}' not found")])
             if account.id not in member_ids:
                 member_ids.append(account.id)
 
@@ -58,7 +54,7 @@ class ChatService:
 
         chat_db = await self.chats_repo.get_by_id(chat_id)
         if not chat_db:
-            return Result(success=False, error="Chat not found", error_code="NOT_FOUND")
+            return Result(success=False, errors=[("NOT_FOUND", "Chat not found")])
 
         # Get owner
         owner_db = await self.accounts_repo.get_by_id(chat_db.owner_user_id)
@@ -81,7 +77,7 @@ class ChatService:
             created_at=chat_db.created_at
         )
 
-        return Result(success=True, data=chat)
+        return Result(success=True, errors=[], data=chat)
 
     async def get_user_chats(self, user_id: int) -> Result[list[Chat]]:
         """Get all chats for user."""
@@ -94,39 +90,39 @@ class ChatService:
             if result.success:
                 chats.append(result.data)
 
-        return Result(success=True, data=chats)
+        return Result(success=True, errors=[], data=chats)
 
     async def add_member(self, chat_id: int, username: str) -> Result[None]:
         """Add member to chat by username."""
 
         chat_db = await self.chats_repo.get_by_id(chat_id)
         if not chat_db:
-            return Result(success=False, error="Chat not found", error_code="NOT_FOUND")
+            return Result(success=False, errors=[("NOT_FOUND", "Chat not found")])
 
         account = await self.accounts_repo.get_by_username(username)
         if not account:
-            return Result(success=False, error="User not found", error_code="NOT_FOUND")
+            return Result(success=False, errors=[("NOT_FOUND", "User not found")])
 
         if await self.members_repo.is_member(chat_id, account.id):
-            return Result(success=False, error="User already a member", error_code="VALIDATION_ERROR")
+            return Result(success=False, errors=[("VALIDATION_ERROR", "User already a member")])
 
         await self.members_repo.add_member(chat_id, account.id)
 
-        return Result(success=True, data=None)
+        return Result(success=True, errors=[], data=None)
 
     async def remove_member(self, chat_id: int, user_id: int) -> Result[None]:
         """Remove member from chat."""
 
         chat_db = await self.chats_repo.get_by_id(chat_id)
         if not chat_db:
-            return Result(success=False, error="Chat not found", error_code="NOT_FOUND")
+            return Result(success=False, errors=[("NOT_FOUND", "Chat not found")])
 
         if not await self.members_repo.is_member(chat_id, user_id):
-            return Result(success=False, error="User is not a member", error_code="NOT_FOUND")
+            return Result(success=False, errors=[("NOT_FOUND", "User is not a member")])
 
         await self.members_repo.remove_member(chat_id, user_id)
 
-        return Result(success=True, data=None)
+        return Result(success=True, errors=[], data=None)
 
     async def leave_chat(self, chat_id: int, user_id: int) -> Result[None]:
         """User leaves chat."""
@@ -138,22 +134,22 @@ class ChatService:
 
         chat_db = await self.chats_repo.get_by_id(chat_id)
         if not chat_db:
-            return Result(success=False, error="Chat not found", error_code="NOT_FOUND")
+            return Result(success=False, errors=[("NOT_FOUND", "Chat not found")])
 
         await self.chats_repo.update_name(chat_id, new_name)
 
-        return Result(success=True, data=None)
+        return Result(success=True, errors=[], data=None)
 
     async def delete_chat(self, chat_id: int) -> Result[None]:
         """Delete chat."""
 
         chat_db = await self.chats_repo.get_by_id(chat_id)
         if not chat_db:
-            return Result(success=False, error="Chat not found", error_code="NOT_FOUND")
+            return Result(success=False, errors=[("NOT_FOUND", "Chat not found")])
 
         await self.chats_repo.delete(chat_id)
 
-        return Result(success=True, data=None)
+        return Result(success=True, errors=[], data=None)
 
     async def is_member(self, chat_id: int, user_id: int) -> bool:
         """Check if user is member of chat."""

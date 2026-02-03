@@ -14,9 +14,9 @@ class Result(Generic[T]):
     """Universal transaction result wrapper."""
 
     success: bool
+
+    errors: list[tuple[str, str]] # [("AUTH_ERROR", "Token not correct"), ("ARGUMENT_UNCORRECTED", "Arg 'sender'")]
     data: T | None = None
-    error: str | None = None
-    error_code: str | None = None
 
 
 class Account(BaseModel):

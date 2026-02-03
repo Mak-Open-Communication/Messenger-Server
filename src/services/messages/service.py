@@ -28,8 +28,8 @@ from src.models.api_models import (
 class MessageContentInput:
     """Input for message content."""
 
-    type: str # "text" or "file"
-    resource_name: str # "db" or "s3"
+    type: str  # "text" or "file"
+    resource_name: str  # "db" or "s3"
     content: str | bytes
 
 
@@ -58,7 +58,7 @@ class MessageService:
         """Send message with contents."""
 
         if not contents:
-            return Result(success=False, error="Message must have content", error_code="VALIDATION_ERROR")
+            return Result(success=False, errors=[("VALIDATION_ERROR", "Message must have content")])
 
         # Create message
         message_id = await self.messages_repo.create(chat_id, sender_id)
@@ -99,7 +99,7 @@ class MessageService:
 
         message_db = await self.messages_repo.get_by_id(message_id)
         if not message_db:
-            return Result(success=False, error="Message not found", error_code="NOT_FOUND")
+            return Result(success=False, errors=[("NOT_FOUND", "Message not found")])
 
         # Get sender
         sender_db = await self.accounts_repo.get_by_id(message_db.sender_user_id)
@@ -145,7 +145,7 @@ class MessageService:
             created_at=message_db.created_at
         )
 
-        return Result(success=True, data=message)
+        return Result(success=True, errors=[], data=message)
 
     async def get_messages(
         self,
@@ -163,17 +163,17 @@ class MessageService:
             if result.success:
                 messages.append(result.data)
 
-        return Result(success=True, data=messages)
+        return Result(success=True, errors=[], data=messages)
 
     async def delete_message(self, message_id: int, user_id: int) -> Result[None]:
         """Delete message (only by author)."""
 
         message_db = await self.messages_repo.get_by_id(message_id)
         if not message_db:
-            return Result(success=False, error="Message not found", error_code="NOT_FOUND")
+            return Result(success=False, errors=[("NOT_FOUND", "Message not found")])
 
         if message_db.sender_user_id != user_id:
-            return Result(success=False, error="Can only delete own messages", error_code="FORBIDDEN")
+            return Result(success=False, errors=[("FORBIDDEN", "Can only delete own messages")])
 
         # Delete files from S3
         contents_db = await self.contents_repo.get_by_message(message_id)
@@ -184,7 +184,7 @@ class MessageService:
         # Delete message (CASCADE will delete contents and tags)
         await self.messages_repo.delete(message_id)
 
-        return Result(success=True, data=None)
+        return Result(success=True, errors=[], data=None)
 
     async def edit_message(
         self,
@@ -196,10 +196,10 @@ class MessageService:
 
         message_db = await self.messages_repo.get_by_id(message_id)
         if not message_db:
-            return Result(success=False, error="Message not found", error_code="NOT_FOUND")
+            return Result(success=False, errors=[("NOT_FOUND", "Message not found")])
 
         if message_db.sender_user_id != user_id:
-            return Result(success=False, error="Can only edit own messages", error_code="FORBIDDEN")
+            return Result(success=False, errors=[("FORBIDDEN", "Can only edit own messages")])
 
         # Delete old files from S3
         contents_db = await self.contents_repo.get_by_message(message_id)
@@ -244,8 +244,8 @@ class MessageService:
 
         message_db = await self.messages_repo.get_by_id(message_id)
         if not message_db:
-            return Result(success=False, error="Message not found", error_code="NOT_FOUND")
+            return Result(success=False, errors=[("NOT_FOUND", "Message not found")])
 
         await self.messages_repo.mark_as_read(message_id)
 
-        return Result(success=True, data=None)
+        return Result(success=True, errors=[], data=None)

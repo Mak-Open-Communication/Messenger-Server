@@ -1,4 +1,4 @@
-from .service import UserService
+from .service import UserService, LoginResult
 
 
-__all__ = ["UserService"]
+__all__ = ["UserService", "LoginResult"]

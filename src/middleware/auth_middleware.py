@@ -26,19 +26,11 @@ class AuthMiddleware:
         async def wrapper(*args, **kwargs):
             token = kwargs.get("token")
             if not token:
-                return Result(
-                    success=False,
-                    error="Token required",
-                    error_code="UNAUTHORIZED"
-                )
+                return Result(success=False, errors=[("UNAUTHORIZED", "Token required")])
 
             token_db = await self.tokens_repo.get_by_token(token)
             if not token_db:
-                return Result(
-                    success=False,
-                    error="Invalid token",
-                    error_code="UNAUTHORIZED"
-                )
+                return Result(success=False, errors=[("UNAUTHORIZED", "Invalid token")])
 
             kwargs.pop("token")
             kwargs["user_id"] = token_db.user_id
