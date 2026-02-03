@@ -1,11 +1,11 @@
 """PostgreSQL Database models"""
 
-from pydantic import BaseModel
+from pydantic import BaseModel as BaseDBModel
 from datetime import datetime
 from typing import Optional
 
 
-class AccountDB(BaseModel):
+class AccountDB(BaseDBModel):
     """Account database model"""
 
     id: int
@@ -14,55 +14,60 @@ class AccountDB(BaseModel):
     display_name: str
     password_hash: str
 
+    last_online_at: datetime
+
     account_is_active: bool
 
     created_at: datetime
 
 
-class TokenDB(BaseModel):
+class TokenDB(BaseDBModel):
     """Token database model"""
 
     id: int
     user_id: int
 
     token: str
-    agent: Optional[str] = None
+    agent: str
 
     created_at: datetime
 
 
-class ChatDB(BaseModel):
+class ChatDB(BaseDBModel):
     """Chat database model"""
 
     id: int
 
-    owner: int
-    name: str
+    owner_user_id: int
+    chat_name: str
 
     created_at: datetime
 
 
-class ChatMemberDB(BaseModel):
+class ChatMemberDB(BaseDBModel):
     """Chat member database model"""
+
     id: int
+
     user_id: int
     chat_id: int
+
     role: str
 
 
-class MessageDB(BaseModel):
+class MessageDB(BaseDBModel):
     """Message database model"""
 
     id: int
     chat_id: int
 
-    sender: int
+    sender_user_id: int
     is_read: bool
 
     created_at: datetime
 
 
-class MessageContentDB(BaseModel):
+class MessageContentDB(BaseDBModel):
     """Message content database model"""
 
     id: int
@@ -71,14 +76,16 @@ class MessageContentDB(BaseModel):
     resource_name: str
 
     type: str
-    content: Optional[str] = None
+    content: str
 
 
-class MessageTagDB(BaseModel):
+class MessageTagDB(BaseDBModel):
     """Message tag database model"""
 
     id: int
     message_id: int
 
+    for_user_id: int
+
     type: str
-    tag: Optional[str] = None
+    tag: str
