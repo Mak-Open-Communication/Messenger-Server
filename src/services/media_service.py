@@ -4,7 +4,7 @@ import mimetypes
 
 from typing import Optional
 
-from src.services.resources_service import BaseS3Repository
+from src.common.base_repos import BaseS3Repository
 
 
 class UsersFilesRepository(BaseS3Repository):
