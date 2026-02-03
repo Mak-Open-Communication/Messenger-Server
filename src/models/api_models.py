@@ -1,7 +1,7 @@
 """API models for client responses"""
 
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Union
 
 
 class Account(BaseModel):
@@ -46,7 +46,6 @@ class Chat(BaseModel):
     chat_name: str
 
     owner: Account
-    admins: List[Account]
     members: List[Account]
 
     created_at: str
@@ -58,20 +57,23 @@ class MessageTag(BaseModel):
     tag_id: int
     message_id: int
 
+    for_user: Account
+
     type: str
     tag: str
 
 
-class MessageContent(BaseModel):
-    """Message content (text or file)"""
+class MsgContentTextChunk(BaseModel):
+    """Message content text"""
 
-    content_id: int
-    message_id: int
+    text: str
 
-    resource_name: str
 
-    type: str
-    content: str
+class MsgContentFile(BaseModel):
+    """Message content file"""
+
+    filename: str
+    payload: bytes
 
 
 class Message(BaseModel):
@@ -80,19 +82,13 @@ class Message(BaseModel):
     message_id: int
     chat_id: int
 
+    sender_user: Account
     is_read: bool
-    sender: Account
 
     tags: List[MessageTag]
-    contents: List[MessageContent]
+    contents: List[Union[MsgContentTextChunk, MsgContentFile]]
 
     created_at: str
-
-
-class MessagesList(BaseModel):
-    """List of messages"""
-
-    messages: List[Message]
 
 
 class ErrorResponse(BaseModel):
@@ -100,4 +96,4 @@ class ErrorResponse(BaseModel):
 
     error: str
     message: str
-    details: Optional[dict] = None
+    details: Optional[list] = None

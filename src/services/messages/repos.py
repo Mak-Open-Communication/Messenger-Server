@@ -1,18 +1,13 @@
-"""Message service with message, content and tag repositories"""
+"""Messages, msg contents and tags repositories"""
 
-from typing import Optional, List, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from src.app import Application
+from typing import Optional, List
 
 from src.common.base_repos import BaseDBRepository
-
-from src.services.media_service import UsersFilesRepository
 
 from src.models.db_models import MessageDB, MessageContentDB, MessageTagDB
 
 
-class MessageRepository(BaseDBRepository):
+class MessagesRepository(BaseDBRepository):
     """Repository for message operations"""
 
     repository_name = "messages"
@@ -77,7 +72,7 @@ class MessageRepository(BaseDBRepository):
         return [MessageDB(**row) for row in rows]
 
 
-class MessageContentRepository(BaseDBRepository):
+class MessageContentsRepository(BaseDBRepository):
     """Repository for message content operations"""
 
     repository_name = "msg-contents"
@@ -134,7 +129,7 @@ class MessageContentRepository(BaseDBRepository):
         return "DELETE" in result
 
 
-class MessageTagRepository(BaseDBRepository):
+class MessageTagsRepository(BaseDBRepository):
     """Repository for message tag operations"""
 
     repository_name = "msg-tags"
@@ -179,15 +174,3 @@ class MessageTagRepository(BaseDBRepository):
         )
 
         return "DELETE" in result
-
-
-class MessageService:
-    """Service for message operations"""
-
-    def __init__(self, app: "Application"):
-        self.app = app
-
-        self.message_repo = MessageRepository(app)
-        self.uploaded_files_repo = UsersFilesRepository(app)
-        self.content_repo = MessageContentRepository(app)
-        self.tag_repo = MessageTagRepository(app)

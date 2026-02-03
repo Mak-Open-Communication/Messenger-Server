@@ -1,7 +1,6 @@
 """PostgreSQL Database models"""
 
 from pydantic import BaseModel as BaseDBModel
-from datetime import datetime
 
 
 class AccountDB(BaseDBModel):
@@ -13,11 +12,11 @@ class AccountDB(BaseDBModel):
     display_name: str
     password_hash: str
 
-    last_online_at: datetime
+    last_online_at: str
 
     account_is_active: bool
 
-    created_at: datetime
+    created_at: str
 
 
 class TokenDB(BaseDBModel):
@@ -29,7 +28,7 @@ class TokenDB(BaseDBModel):
     token: str
     agent: str
 
-    created_at: datetime
+    created_at: str
 
 
 class ChatDB(BaseDBModel):
@@ -40,7 +39,7 @@ class ChatDB(BaseDBModel):
     owner_user_id: int
     chat_name: str
 
-    created_at: datetime
+    created_at: str
 
 
 class ChatMemberDB(BaseDBModel):
@@ -63,7 +62,7 @@ class MessageDB(BaseDBModel):
     sender_user_id: int
     is_read: bool
 
-    created_at: datetime
+    created_at: str
 
 
 class MessageContentDB(BaseDBModel):
