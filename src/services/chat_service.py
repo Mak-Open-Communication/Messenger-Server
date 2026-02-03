@@ -74,7 +74,7 @@ class ChatRepository(BaseDBRepository):
         return [ChatDB(**row) for row in rows]
 
 
-class ChatMemberRepository(BaseDBRepository):
+class ChatMembersRepository(BaseDBRepository):
     """Repository for chat member operations"""
 
     repository_name = "chat-members"
@@ -163,4 +163,4 @@ class ChatService:
         self.app = app
 
         self.chat_repo = ChatRepository(app)
-        self.member_repo = ChatMemberRepository(app)
+        self.members_repo = ChatMembersRepository(app)
