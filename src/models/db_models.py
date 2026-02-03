@@ -2,7 +2,6 @@
 
 from pydantic import BaseModel as BaseDBModel
 from datetime import datetime
-from typing import Optional
 
 
 class AccountDB(BaseDBModel):
