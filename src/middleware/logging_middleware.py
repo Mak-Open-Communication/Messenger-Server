@@ -78,7 +78,7 @@ class LoggingMiddleware:
         @wraps(func)
         async def wrapper(*args, **kwargs):
             transaction_name = func.__name__
-            user_id = kwargs.get("user_id", "anonymous")
+            user_id = kwargs.get("user_id", "<no-login>")
             start_time = time.time()
 
             try:
@@ -87,7 +87,7 @@ class LoggingMiddleware:
 
                 self.logger.log(
                     level,
-                    f"[user:{user_id}] Transaction '{transaction_name}' completed [{duration:.3f}s]"
+                    f"[u:{user_id}] Transaction '{transaction_name}' completed [{duration:.3f}s]"
                 )
 
                 return result
@@ -96,7 +96,7 @@ class LoggingMiddleware:
                 duration = time.time() - start_time
 
                 self.logger.error(
-                    f"[user:{user_id}] Transaction '{transaction_name}' failed: "
+                    f"[u:{user_id}] Transaction '{transaction_name}' failed: "
                     f"{type(e).__name__}: {e} [{duration:.3f}s]",
                     exc_info=True
                 )
@@ -121,11 +121,11 @@ class LoggingMiddleware:
         @wraps(func)
         async def wrapper(*args, **kwargs):
             subscription_name = func.__name__
-            user_id = kwargs.get("user_id", "anonymous")
+            user_id = kwargs.get("user_id", "<no-login>")
 
             self.logger.log(
                 level,
-                f"[user:{user_id}] Subscription '{subscription_name}' started"
+                f"[u:{user_id}] Subscription '{subscription_name}' started"
             )
 
             try:
@@ -135,12 +135,12 @@ class LoggingMiddleware:
             except GeneratorExit:
                 self.logger.log(
                     level,
-                    f"[user:{user_id}] Subscription '{subscription_name}' closed"
+                    f"[u:{user_id}] Subscription '{subscription_name}' closed"
                 )
 
             except Exception as e:
                 self.logger.error(
-                    f"[user:{user_id}] Subscription '{subscription_name}' error: "
+                    f"[u:{user_id}] Subscription '{subscription_name}' error: "
                     f"{type(e).__name__}: {e}",
                     exc_info=True
                 )
