@@ -12,6 +12,32 @@ from enum import Enum
 from uuid import UUID
 from typing import Any, Type, get_type_hints, get_origin, get_args, Union
 
+try:
+    from pydantic import BaseModel as PydanticBaseModel
+    PYDANTIC_AVAILABLE = True
+except ImportError:
+    PydanticBaseModel = None
+    PYDANTIC_AVAILABLE = False
+
+
+def _is_pydantic_model(obj: Any) -> bool:
+    """Check if object is a Pydantic model instance."""
+
+    if not PYDANTIC_AVAILABLE:
+        return False
+    return isinstance(obj, PydanticBaseModel)
+
+
+def _is_pydantic_model_class(cls: Type) -> bool:
+    """Check if class is a Pydantic model class."""
+
+    if not PYDANTIC_AVAILABLE:
+        return False
+    try:
+        return isinstance(cls, type) and issubclass(cls, PydanticBaseModel)
+    except TypeError:
+        return False
+
 
 class TypeTag:
     """Type tags for binary protocol."""
@@ -39,6 +65,7 @@ class TypeTag:
     INT_NEGATIVE = 0x15
     INT_BIG = 0x16
     INT_BIG_NEGATIVE = 0x17
+    PYDANTIC_MODEL = 0x18
 
 
 def serialize(obj: Any) -> bytes:
@@ -83,6 +110,9 @@ def serialize(obj: Any) -> bytes:
 
     if dataclasses.is_dataclass(obj) and not isinstance(obj, type):
         return _serialize_dataclass(obj)
+
+    if _is_pydantic_model(obj):
+        return _serialize_pydantic(obj)
 
     if isinstance(obj, datetime):
         return _serialize_datetime(obj)
@@ -184,6 +214,9 @@ def deserialize(data: bytes, expected_type: Type = None) -> tuple[Any, int]:
 
     if tag == TypeTag.DATACLASS:
         return _deserialize_dataclass(data, offset, expected_type)
+
+    if tag == TypeTag.PYDANTIC_MODEL:
+        return _deserialize_pydantic(data, offset, expected_type)
 
     if tag == TypeTag.DATETIME:
         return _deserialize_datetime(data, offset)
@@ -363,6 +396,68 @@ def _deserialize_dataclass(data: bytes, offset: int, expected_type: Type = None)
         return expected_type(**field_values), offset
 
     # Return as dict when no expected_type - will be converted later by prepare_arguments
+    return field_values, offset
+
+
+def _serialize_pydantic(obj) -> bytes:
+    """Serialize Pydantic model instance."""
+
+    cls = type(obj)
+    class_name = f"{cls.__module__}.{cls.__qualname__}"
+    name_bytes = class_name.encode('utf-8')
+
+    model_data = obj.model_dump()
+    fields = list(model_data.keys())
+
+    result = bytearray([TypeTag.PYDANTIC_MODEL])
+    result.extend(_pack_length(len(name_bytes)))
+    result.extend(name_bytes)
+    result.extend(_pack_length(len(fields)))
+
+    for field_name in fields:
+        fname_bytes = field_name.encode('utf-8')
+        result.extend(_pack_length(len(fname_bytes)))
+        result.extend(fname_bytes)
+        result.extend(serialize(model_data[field_name]))
+
+    return bytes(result)
+
+
+def _deserialize_pydantic(data: bytes, offset: int, expected_type: Type = None) -> tuple[Any, int]:
+    """Deserialize Pydantic model instance."""
+
+    name_len, len_size = _unpack_length(data[offset:])
+    offset += len_size
+    class_name = data[offset:offset + name_len].decode('utf-8')
+    offset += name_len
+
+    field_count, len_size = _unpack_length(data[offset:])
+    offset += len_size
+
+    field_values = {}
+    field_types = {}
+
+    if expected_type and _is_pydantic_model_class(expected_type):
+        try:
+            field_types = get_type_hints(expected_type)
+        except Exception:
+            pass
+
+    for _ in range(field_count):
+        fname_len, len_size = _unpack_length(data[offset:])
+        offset += len_size
+        field_name = data[offset:offset + fname_len].decode('utf-8')
+        offset += fname_len
+
+        field_type = field_types.get(field_name)
+        value, consumed = deserialize(data[offset:], field_type)
+        offset += consumed
+        field_values[field_name] = value
+
+    if expected_type and _is_pydantic_model_class(expected_type):
+        return expected_type.model_validate(field_values), offset
+
+    # Return as dict when no expected_type
     return field_values, offset
 
 
