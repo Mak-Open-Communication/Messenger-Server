@@ -1,4 +1,4 @@
-from .service import MessageService
+from .service import MessageService, MessageContentInput
 
 
-__all__ = [MessageService]
+__all__ = [MessageService, MessageContentInput]
