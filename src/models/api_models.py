@@ -1,31 +1,46 @@
-"""API models for client responses"""
+"""API models for client responses."""
+
+from dataclasses import dataclass
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel
-from typing import List, Optional, Union
+
+
+T = TypeVar('T')
+
+
+@dataclass
+class Result(Generic[T]):
+    """Universal transaction result wrapper."""
+
+    success: bool
+    data: T | None = None
+    error: str | None = None
+    error_code: str | None = None
 
 
 class Account(BaseModel):
-    """User account information"""
+    """User account information."""
 
     account_id: int
 
     username: str
     display_name: str
 
-    last_online_at: str
+    last_online_at: str | None
     in_online: bool
 
     created_at: str
 
 
 class AuthToken(BaseModel):
-    """Authentication token information"""
+    """Authentication token information."""
 
     token_id: str
     user_id: int
 
     token: str
-    agent: Optional[str] = None
+    agent: str | None = None
 
     is_current: bool
     is_online: bool
@@ -34,50 +49,50 @@ class AuthToken(BaseModel):
 
 
 class PersonalTokensList(BaseModel):
-    """List of user tokens"""
+    """List of user tokens."""
 
-    tokens: List[AuthToken]
+    tokens: list[AuthToken]
 
 
 class Chat(BaseModel):
-    """Chat information"""
+    """Chat information."""
 
     chat_id: int
     chat_name: str
 
     owner: Account
-    members: List[Account]
+    members: list[Account]
 
     created_at: str
 
 
 class MessageTag(BaseModel):
-    """Message tag for UI effects"""
+    """Message tag for UI effects."""
 
     tag_id: int
     message_id: int
 
-    for_user: Account
+    for_user: Account | None
 
     type: str
     tag: str
 
 
 class MsgContentTextChunk(BaseModel):
-    """Message content text"""
+    """Message content text chunk."""
 
     text: str
 
 
 class MsgContentFile(BaseModel):
-    """Message content file"""
+    """Message content file."""
 
     filename: str
     payload: bytes
 
 
 class Message(BaseModel):
-    """Message with sender, contents and tags"""
+    """Message with sender, contents and tags."""
 
     message_id: int
     chat_id: int
@@ -85,15 +100,7 @@ class Message(BaseModel):
     sender_user: Account
     is_read: bool
 
-    tags: List[MessageTag]
-    contents: List[Union[MsgContentTextChunk, MsgContentFile]]
+    tags: list[MessageTag]
+    contents: list[MsgContentTextChunk | MsgContentFile]
 
     created_at: str
-
-
-class ErrorResponse(BaseModel):
-    """Error response for client errors"""
-
-    error: str
-    message: str
-    details: Optional[list] = None

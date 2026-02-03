@@ -74,10 +74,10 @@ class MessagesRepository(BaseDBRepository):
         return MessageDB(**row) if row else None
 
     async def create(self, chat_id: int, sender_id: int, is_read: bool = False, conn=None) -> int:
-        """Create new message and return ID"""
+        """Create new message and return ID."""
 
         message_id = await self.fetchval(
-            f"""INSERT INTO {self._get_table_name()} (chat_id, sender, is_read)
+            f"""INSERT INTO {self._get_table_name()} (chat_id, sender_user_id, is_read)
                 VALUES ($1, $2, $3)
                 RETURNING id""",
             chat_id, sender_id, is_read,
@@ -190,15 +190,16 @@ class MessageTagsRepository(BaseDBRepository):
         message_id: int,
         tag_type: str,
         tag_value: str = "",
+        for_user_id: int | None = None,
         conn=None
     ) -> int:
-        """Add tag to message and return ID"""
+        """Add tag to message and return ID."""
 
         tag_id = await self.fetchval(
-            f"""INSERT INTO {self._get_table_name()} (message_id, type, tag)
-                VALUES ($1, $2, $3)
+            f"""INSERT INTO {self._get_table_name()} (message_id, type, tag, for_user_id)
+                VALUES ($1, $2, $3, $4)
                 RETURNING id""",
-            message_id, tag_type, tag_value,
+            message_id, tag_type, tag_value, for_user_id,
             conn=conn
         )
 

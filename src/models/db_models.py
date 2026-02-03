@@ -1,10 +1,10 @@
-"""PostgreSQL Database models"""
+"""PostgreSQL Database models."""
 
 from pydantic import BaseModel as BaseDBModel
 
 
 class AccountDB(BaseDBModel):
-    """Account database model"""
+    """Account database model."""
 
     id: int
 
@@ -12,7 +12,7 @@ class AccountDB(BaseDBModel):
     display_name: str
     password_hash: str
 
-    last_online_at: str
+    last_online_at: str | None
 
     account_is_active: bool
 
@@ -20,19 +20,19 @@ class AccountDB(BaseDBModel):
 
 
 class TokenDB(BaseDBModel):
-    """Token database model"""
+    """Token database model."""
 
     id: int
     user_id: int
 
     token: str
-    agent: str
+    agent: str | None
 
     created_at: str
 
 
 class ChatDB(BaseDBModel):
-    """Chat database model"""
+    """Chat database model."""
 
     id: int
 
@@ -43,7 +43,7 @@ class ChatDB(BaseDBModel):
 
 
 class ChatMemberDB(BaseDBModel):
-    """Chat member database model"""
+    """Chat member database model."""
 
     id: int
 
@@ -54,7 +54,7 @@ class ChatMemberDB(BaseDBModel):
 
 
 class MessageDB(BaseDBModel):
-    """Message database model"""
+    """Message database model."""
 
     id: int
     chat_id: int
@@ -66,7 +66,7 @@ class MessageDB(BaseDBModel):
 
 
 class MessageContentDB(BaseDBModel):
-    """Message content database model"""
+    """Message content database model."""
 
     id: int
     message_id: int
@@ -78,12 +78,12 @@ class MessageContentDB(BaseDBModel):
 
 
 class MessageTagDB(BaseDBModel):
-    """Message tag database model"""
+    """Message tag database model."""
 
     id: int
     message_id: int
 
-    for_user_id: int
+    for_user_id: int | None
 
     type: str
     tag: str

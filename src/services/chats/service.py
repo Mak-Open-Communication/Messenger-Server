@@ -27,10 +27,10 @@ class ChatRepository(BaseDBRepository):
         return ChatDB(**row) if row else None
 
     async def create(self, owner_id: int, name: str, conn=None) -> int:
-        """Create new chat and return ID"""
+        """Create new chat and return ID."""
 
         chat_id = await self.fetchval(
-            f"""INSERT INTO {self._get_table_name()} (owner, name)
+            f"""INSERT INTO {self._get_table_name()} (owner_user_id, chat_name)
                 VALUES ($1, $2)
                 RETURNING id""",
             owner_id, name,
@@ -40,10 +40,10 @@ class ChatRepository(BaseDBRepository):
         return chat_id
 
     async def update_name(self, chat_id: int, name: str, conn=None) -> bool:
-        """Update chat name"""
+        """Update chat name."""
 
         result = await self.execute(
-            f"UPDATE {self._get_table_name()} SET name = $1 WHERE id = $2",
+            f"UPDATE {self._get_table_name()} SET chat_name = $1 WHERE id = $2",
             name, chat_id,
             conn=conn
         )
