@@ -144,7 +144,7 @@ class MessageService:
             is_read=message_db.is_read,
             tags=tags,
             contents=contents,
-            created_at=message_db.created_at
+            created_at=message_db.created_at.isoformat()
         )
 
         return Result(success=True, errors=[], data=message)

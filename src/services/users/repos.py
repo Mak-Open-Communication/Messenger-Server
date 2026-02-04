@@ -131,9 +131,9 @@ class AccountsRepository(BaseDBRepository):
         if is_online:
             last_online_at = datetime.now(UTC_PLUS_3).isoformat()
         elif account_db.last_online_at:
-            last_online_at = account_db.last_online_at
+            last_online_at = account_db.last_online_at.isoformat()
         else:
-            last_online_at = account_db.created_at
+            last_online_at = account_db.created_at.isoformat()
 
         return Account(
             account_id=account_db.id,
@@ -141,7 +141,7 @@ class AccountsRepository(BaseDBRepository):
             display_name=account_db.display_name,
             last_online_at=last_online_at,
             in_online=is_online,
-            created_at=account_db.created_at
+            created_at=account_db.created_at.isoformat()
         )
 
 
@@ -229,7 +229,7 @@ class TokensRepository(BaseDBRepository):
             token_id=str(token_db.id),
             user_id=token_db.user_id,
             token=token_db.token,
-            created_at=token_db.created_at,
+            created_at=token_db.created_at.isoformat(),
             is_current=is_current,
             is_online=is_online,
             agent=token_db.agent

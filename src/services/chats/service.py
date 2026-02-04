@@ -74,7 +74,7 @@ class ChatService:
             chat_name=chat_db.chat_name,
             owner=owner,
             members=members,
-            created_at=chat_db.created_at
+            created_at=chat_db.created_at.isoformat()
         )
 
         return Result(success=True, errors=[], data=chat)
