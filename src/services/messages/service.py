@@ -113,9 +113,11 @@ class MessageService:
                 contents.append(MsgContentTextChunk(text=content_db.content))
             elif content_db.type == "file":
                 # Download file from S3
-                file_bytes = await self.files_repo.download(content_db.content)
-                filename = content_db.content.split("/")[-1]
-                contents.append(MsgContentFile(filename=filename, payload=file_bytes or b""))
+                file_result = await self.files_repo.download(content_db.content)
+                if file_result:
+                    contents.append(MsgContentFile(filename=file_result.original_filename, payload=file_result.data))
+                else:
+                    contents.append(MsgContentFile(filename="unknown", payload=b""))
 
         # Get tags
         tags_db = await self.tags_repo.get_by_message(message_id)
@@ -249,3 +251,35 @@ class MessageService:
         await self.messages_repo.mark_as_read(message_id)
 
         return Result(success=True, errors=[], data=None)
+
+    async def get_messages_hash(self, chat_id: int, last_count: int = 40) -> Result[str]:
+        """
+        Get MD5 hash of last N messages for sync check.
+
+        Hash is calculated from JSON of messages (message_id + content).
+        Messages are ordered from newest to oldest.
+        """
+
+        import hashlib
+        import json
+
+        messages_db = await self.messages_repo.get_by_chat(chat_id, limit=last_count)
+
+        # Build data for hashing: list of {message_id, contents}
+        hash_data = []
+        for message_db in messages_db:
+            contents_db = await self.contents_repo.get_by_message(message_db.id)
+
+            # Collect all content strings (text or s3 path)
+            content_strings = [c.content for c in contents_db]
+
+            hash_data.append({
+                "message_id": message_db.id,
+                "content": content_strings
+            })
+
+        # Serialize to JSON and hash
+        json_str = json.dumps(hash_data, ensure_ascii=False, sort_keys=True)
+        hash_result = hashlib.md5(json_str.encode()).hexdigest()
+
+        return Result(success=True, errors=[], data=hash_result)

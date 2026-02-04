@@ -82,6 +82,7 @@ class S3API:
         key: str,
         data: bytes,
         content_type: Optional[str] = None,
+        metadata: Optional[dict[str, str]] = None,
     ) -> bool:
         """
         Upload file to S3.
@@ -90,6 +91,7 @@ class S3API:
             key: Object key (path in bucket)
             data: File data as bytes
             content_type: MIME type (e.g., 'image/png')
+            metadata: Custom metadata dict
 
         Returns:
             True if successful
@@ -99,6 +101,8 @@ class S3API:
                 extra_args = {}
                 if content_type:
                     extra_args["ContentType"] = content_type
+                if metadata:
+                    extra_args["Metadata"] = metadata
 
                 await client.put_object(
                     Bucket=self.bucket_name,
@@ -128,6 +132,29 @@ class S3API:
                 )
                 async with response["Body"] as stream:
                     return await stream.read()
+        except ClientError:
+            return None
+
+    async def download_file_with_metadata(self, key: str) -> Optional[tuple[bytes, dict[str, str]]]:
+        """
+        Download file from S3 with metadata.
+
+        Args:
+            key: Object key (path in bucket)
+
+        Returns:
+            Tuple of (file data, metadata dict) or None if not found
+        """
+        try:
+            async with self._client() as client:
+                response = await client.get_object(
+                    Bucket=self.bucket_name,
+                    Key=key,
+                )
+                metadata = response.get("Metadata", {})
+                async with response["Body"] as stream:
+                    data = await stream.read()
+                return data, metadata
         except ClientError:
             return None
 

@@ -1,9 +1,20 @@
 """Message repositories for messages, contents, tags and files."""
 
+import hashlib
 import mimetypes
+from dataclasses import dataclass
+from uuid import uuid4
 
 from src.common.base_repos import BaseDBRepository, BaseS3Repository
 from src.models.db_models import MessageDB, MessageContentDB, MessageTagDB
+
+
+@dataclass
+class FileDownloadResult:
+    """Result of file download with original filename."""
+
+    data: bytes
+    original_filename: str
 
 
 class MessagesRepository(BaseDBRepository):
@@ -187,6 +198,30 @@ class UsersFilesRepository(BaseS3Repository):
     repository_name = "users-msg-files"
     resources_dir = "users/uploaded_files/"
 
+    @staticmethod
+    def _generate_s3_filename(original_filename: str, file_bytes: bytes) -> str:
+        """
+        Generate S3 filename: {name}_{md5}_{uuid}.{ext}
+
+        Example: photo_a1b2c3d4_550e8400-e29b-41d4-a716-446655440000.jpg
+        """
+
+        # Split filename and extension
+        if "." in original_filename:
+            name_part, ext = original_filename.rsplit(".", 1)
+            ext = f".{ext}"
+        else:
+            name_part = original_filename
+            ext = ""
+
+        # Generate MD5 hash of content
+        content_hash = hashlib.md5(file_bytes).hexdigest()[:8]
+
+        # Generate UUID
+        unique_id = str(uuid4())
+
+        return f"{name_part}_{content_hash}_{unique_id}{ext}"
+
     async def upload(
         self,
         chat_id: int,
@@ -196,20 +231,30 @@ class UsersFilesRepository(BaseS3Repository):
     ) -> str:
         """Upload file to S3 and return S3 path."""
 
-        s3_path = f"{chat_id}/{message_id}/{filename}"
+        s3_filename = self._generate_s3_filename(filename, file_bytes)
+        s3_path = f"{chat_id}/{message_id}/{s3_filename}"
         full_key = self._get_full_key(s3_path)
 
         content_type, _ = mimetypes.guess_type(filename)
+        metadata = {"original_filename": filename}
 
-        await self.s3.upload_file(full_key, file_bytes, content_type=content_type)
+        await self.s3.upload_file(full_key, file_bytes, content_type=content_type, metadata=metadata)
 
         return s3_path
 
-    async def download(self, s3_path: str) -> bytes | None:
-        """Download file from S3 by path."""
+    async def download(self, s3_path: str) -> FileDownloadResult | None:
+        """Download file from S3 with original filename."""
 
         full_key = self._get_full_key(s3_path)
-        return await self.s3.download_file(full_key)
+        result = await self.s3.download_file_with_metadata(full_key)
+
+        if result is None:
+            return None
+
+        data, metadata = result
+        original_filename = metadata.get("original_filename", s3_path.split("/")[-1])
+
+        return FileDownloadResult(data=data, original_filename=original_filename)
 
     async def delete(self, s3_path: str) -> bool:
         """Delete file from S3."""
