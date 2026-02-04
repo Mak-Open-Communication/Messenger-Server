@@ -2,12 +2,14 @@
 
 import asyncio
 import logging
+
 from dataclasses import dataclass
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, AsyncGenerator
 
 if TYPE_CHECKING:
     from src.app import Application
+
+from src.services.chats.repos import ChatMembersRepository
 
 from src.config import settings
 
@@ -125,8 +127,6 @@ class NotifyManager:
 
     async def notify_chat(self, chat_id: int, event: Event, exclude_user_id: int | None = None) -> None:
         """Send event to all members of a chat."""
-
-        from src.services.chats.repos import ChatMembersRepository
 
         members_repo = ChatMembersRepository(self.app)
         member_ids = await members_repo.get_member_user_ids(chat_id)
