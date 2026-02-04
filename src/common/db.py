@@ -66,6 +66,7 @@ class DatabaseAPI:
         if self.pool:
             await self.pool.close()
             self.pool = None
+            self.logger.info("Database disconnected")
 
     async def ping(self) -> bool:
         """Check database connectivity."""

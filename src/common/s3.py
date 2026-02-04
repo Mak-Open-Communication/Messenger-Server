@@ -53,6 +53,8 @@ class S3API:
 
         self.session = None
 
+        self.logger.info("S3 disconnected")
+
     @asynccontextmanager
     async def _client(self):
         """Get S3 client context manager."""

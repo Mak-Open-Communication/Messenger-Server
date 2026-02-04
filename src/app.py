@@ -59,11 +59,9 @@ class Application:
 
         if self.db.pool:
             await self.db.disconnect()
-            self.logger.info("Database disconnected")
 
         if self.s3.session:
             await self.s3.disconnect()
-            self.logger.info("S3 disconnected")
 
         if self.server:
             await self.server.down()
