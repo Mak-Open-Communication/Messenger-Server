@@ -67,7 +67,7 @@ class DatabaseAPI:
             raise RuntimeError(f"Database '{settings.psql_db}' does not exist")
 
         except Exception as e:
-            self.logger.error(f"Failed to connect to PostgreSQL: {e}")
+            self.logger.critical(f"Failed to connect to PostgreSQL: {e}")
 
             raise
 
@@ -84,9 +84,6 @@ class DatabaseAPI:
             )
 
             if db_version != DB_SCHEMA_VERSION:
-                self.logger.critical(
-                    f"Schema version mismatch: expected {DB_SCHEMA_VERSION}, got {db_version}"
-                )
                 raise RuntimeError(
                     f"Schema version mismatch: expected {DB_SCHEMA_VERSION}, got {db_version}. "
                     "Please run database migrations."
@@ -95,10 +92,8 @@ class DatabaseAPI:
             self.logger.info(f"Schema version OK: {db_version}")
 
         except asyncpg.UndefinedTableError:
-            self.logger.critical("Schema info table not found. Migrations not applied.")
-
             raise RuntimeError(
-                "Database schema not initialized. Please run the updated migrations."
+                "Database schema not initialized. Please run latest migrations."
             )
 
     async def disconnect(self) -> None:

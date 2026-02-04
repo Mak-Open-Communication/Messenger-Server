@@ -45,5 +45,5 @@ if __name__ == "__main__":
             traceback.print_exc()
         else:
             logger.critical(
-                "Critical unexpected error. Enable the 'showing_tracebacks' parameter in your .env file for debugging.")
+                "Critical error. Enable the 'showing_tracebacks' parameter in your .env file for debugging.")
         sys.exit(1)
