@@ -1,3 +1,5 @@
+"""Handlers registration."""
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -11,6 +13,8 @@ from src.handlers.users import register_users_handlers
 from src.handlers.chats import register_chats_handlers
 from src.handlers.messages import register_messages_handlers
 
+from src.handlers.subscriptions import register_subscription_handlers
+
 
 def register_handlers(app: "Application"):
     """Register all handlers."""
@@ -22,3 +26,5 @@ def register_handlers(app: "Application"):
 
     register_chats_handlers(app=app)
     register_messages_handlers(app=app)
+
+    register_subscription_handlers(app=app)
