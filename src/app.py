@@ -8,8 +8,9 @@ from typing import Optional
 
 from src.middleware.logging_middleware import setup_logging
 
-from src.db import DatabaseAPI
-from src.s3 import S3API
+from src.common.db import DatabaseAPI
+from src.common.s3 import S3API
+from src.common.notify_manager import NotifyManager
 
 from src.handlers import register_handlers
 from src.htcp.aio_server import AsyncServer
@@ -29,6 +30,8 @@ class Application:
 
         self.db: DatabaseAPI = DatabaseAPI()
         self.s3: S3API = S3API()
+
+        self.notify_man: NotifyManager = NotifyManager(self)
 
         self.server: Optional[AsyncServer] = None
 
