@@ -1,6 +1,7 @@
 """
 Database API module for PostgreSQL operations.
 """
+
 import logging
 import asyncpg
 
