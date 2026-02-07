@@ -104,6 +104,13 @@ class NotifyManager:
 
         return user_id in self._subscriptions and len(self._subscriptions[user_id]) > 0
 
+    def is_token_online(self, user_id: int, token: str) -> bool:
+        """Check if a specific token has an active subscription."""
+
+        if user_id not in self._subscriptions:
+            return False
+        return token in self._subscriptions[user_id]
+
     def get_online_user_ids(self) -> list[int]:
         """Get list of all online user IDs."""
 

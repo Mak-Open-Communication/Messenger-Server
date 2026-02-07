@@ -2,6 +2,7 @@
 
 import json
 import hashlib
+
 from dataclasses import dataclass
 from uuid import uuid4
 from typing import TYPE_CHECKING
@@ -39,8 +40,7 @@ class UserService:
         if not account_db:
             return Result(success=False, errors=[("NOT_FOUND", "User not found")])
 
-        # TODO: check is_online via NotifyManager
-        is_online = False
+        is_online = self.app.notify_man.is_online(account_db.id)
         account = self.accounts_repo.to_api_model(account_db, is_online)
 
         return Result(success=True, errors=[], data=account)
@@ -52,8 +52,7 @@ class UserService:
         if not account_db:
             return Result(success=False, errors=[("NOT_FOUND", "User not found")])
 
-        # TODO: check is_online via NotifyManager
-        is_online = False
+        is_online = self.app.notify_man.is_online(account_db.id)
         account = self.accounts_repo.to_api_model(account_db, is_online)
 
         return Result(success=True, errors=[], data=account)
@@ -66,9 +65,8 @@ class UserService:
 
         accounts_db = await self.accounts_repo.search_by_username(query, limit)
 
-        # TODO: check is_online via NotifyManager
         accounts = [
-            self.accounts_repo.to_api_model(acc, is_online=False)
+            self.accounts_repo.to_api_model(acc, is_online=self.app.notify_man.is_online(acc.id))
             for acc in accounts_db
         ]
 
@@ -190,12 +188,11 @@ class UserService:
 
         tokens_db = await self.tokens_repo.get_by_user_id(user_id)
 
-        # TODO: check is_online via NotifyManager
         tokens = [
             self.tokens_repo.to_api_model(
                 token_db,
                 is_current=(token_db.token == current_token),
-                is_online=False
+                is_online=self.app.notify_man.is_token_online(token_db.user_id, token_db.token)
             )
             for token_db in tokens_db
         ]

@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 from src.services.chats.repos import ChatsRepository, ChatMembersRepository
 from src.services.users.repos import AccountsRepository
-from src.models.api_models import Account, Chat, Result
+from src.models.api_models import Chat, Result
 
 
 class ChatService:
@@ -58,7 +58,7 @@ class ChatService:
 
         # Get owner
         owner_db = await self.accounts_repo.get_by_id(chat_db.owner_user_id)
-        owner = self.accounts_repo.to_api_model(owner_db, is_online=False)
+        owner = self.accounts_repo.to_api_model(owner_db, is_online=self.app.notify_man.is_online(owner_db.id))
 
         # Get members
         member_ids = await self.members_repo.get_member_user_ids(chat_id)
@@ -66,8 +66,10 @@ class ChatService:
         for user_id in member_ids:
             account_db = await self.accounts_repo.get_by_id(user_id)
             if account_db:
-                # TODO: check is_online via NotifyManager
-                members.append(self.accounts_repo.to_api_model(account_db, is_online=False))
+                members.append(self.accounts_repo.to_api_model(
+                    account_db,
+                    is_online=self.app.notify_man.is_online(account_db.id)
+                ))
 
         chat = Chat(
             chat_id=chat_db.id,

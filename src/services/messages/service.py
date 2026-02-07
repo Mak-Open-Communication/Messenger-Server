@@ -19,7 +19,6 @@ from src.models.api_models import (
     MessageTag,
     MsgContentTextChunk,
     MsgContentFile,
-    Account,
     Result
 )
 
@@ -103,7 +102,7 @@ class MessageService:
 
         # Get sender
         sender_db = await self.accounts_repo.get_by_id(message_db.sender_user_id)
-        sender = self.accounts_repo.to_api_model(sender_db, is_online=False)
+        sender = self.accounts_repo.to_api_model(sender_db, is_online=self.app.notify_man.is_online(sender_db.id))
 
         # Get contents
         contents_db = await self.contents_repo.get_by_message(message_id)
@@ -127,7 +126,10 @@ class MessageService:
             if tag_db.for_user_id:
                 for_user_db = await self.accounts_repo.get_by_id(tag_db.for_user_id)
                 if for_user_db:
-                    for_user = self.accounts_repo.to_api_model(for_user_db, is_online=False)
+                    for_user = self.accounts_repo.to_api_model(
+                        for_user_db,
+                        is_online=self.app.notify_man.is_online(for_user_db.id)
+                    )
 
             tags.append(MessageTag(
                 tag_id=tag_db.id,
