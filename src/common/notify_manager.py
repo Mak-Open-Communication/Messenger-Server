@@ -82,6 +82,8 @@ class NotifyManager:
 
         from src.services.users.repos import AccountsRepository
 
+        went_offline = False
+
         async with self._lock:
             if user_id in self._subscriptions:
                 self._subscriptions[user_id].pop(token, None)
@@ -89,13 +91,15 @@ class NotifyManager:
                 # If no more subscriptions for this user
                 if not self._subscriptions[user_id]:
                     del self._subscriptions[user_id]
+                    went_offline = True
 
-        # Update last_online_at
-        accounts_repo = AccountsRepository(self.app)
-        await accounts_repo.update_last_online(user_id)
+        if went_offline:
+            # Update last_online_at
+            accounts_repo = AccountsRepository(self.app)
+            await accounts_repo.update_last_online(user_id)
 
-        # Notify user_offline
-        await self._broadcast_user_offline(user_id)
+            # Notify user_offline
+            await self._broadcast_user_offline(user_id)
 
         self.logger.info(f"User {user_id} unsubscribed token {token[:8]}...")
 
@@ -213,7 +217,7 @@ class NotifyManager:
                 "message_content": message_preview[:61]
             }
         )
-        await self.notify_chat(chat_id, event, exclude_user_id=sender_user_id)
+        await self.notify_chat(chat_id, event)
 
     async def send_message_edited(self, chat_id: int, message_id: int, editor_user_id: int) -> None:
         """Send message_edited event to chat members."""
